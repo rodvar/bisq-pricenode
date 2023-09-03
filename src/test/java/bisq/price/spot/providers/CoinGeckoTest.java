@@ -29,5 +29,4 @@ public class CoinGeckoTest extends AbstractExchangeRateProviderTest {
     public void doGet_successfulCall() {
         doGet_successfulCall(new CoinGecko(new StandardEnvironment()));
     }
-
 }
