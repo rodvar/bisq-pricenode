@@ -18,9 +18,7 @@
 package bisq.price.spot;
 
 import bisq.common.util.Tuple2;
-
 import bisq.core.util.InlierUtil;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -39,17 +37,22 @@ class ExchangeRateService {
 
     private final Environment env;
     private final List<ExchangeRateProvider> providers;
+    private final List<ExchangeRateTransformer> transformers;
 
     /**
      * Construct an {@link ExchangeRateService} with a list of all
      * {@link ExchangeRateProvider} implementations discovered via classpath scanning.
      *
-     * @param providers all {@link ExchangeRateProvider} implementations in ascending
-     *                  order of precedence
+     * @param providers    all {@link ExchangeRateProvider} implementations in ascending
+     *                     order of precedence
+     * @param transformers all {@link ExchangeRateTransformer} implementations
      */
-    public ExchangeRateService(Environment env, List<ExchangeRateProvider> providers) {
+    public ExchangeRateService(Environment env,
+                               List<ExchangeRateProvider> providers,
+                               List<ExchangeRateTransformer> transformers) {
         this.env = env;
         this.providers = providers;
+        this.transformers = transformers;
     }
 
     public Map<String, Object> getAllMarketPrices() {
@@ -162,17 +165,29 @@ class ExchangeRateService {
         for (ExchangeRateProvider p : providers) {
             if (p.get() == null)
                 continue;
+
             for (ExchangeRate exchangeRate : p.get()) {
                 String currencyCode = exchangeRate.getCurrency();
+
+                List<ExchangeRate> transformedExchangeRates = transformers.stream()
+                        .filter(transformer -> transformer.supportedCurrency()
+                                .equals(currencyCode)
+                        )
+                        .map(t -> t.apply(p, exchangeRate))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList());
+
                 if (currencyCodeToExchangeRates.containsKey(currencyCode)) {
                     List<ExchangeRate> l = new ArrayList<>(currencyCodeToExchangeRates.get(currencyCode));
-                    l.add(exchangeRate);
+                    l.addAll(transformedExchangeRates);
                     currencyCodeToExchangeRates.put(currencyCode, l);
                 } else {
-                    currencyCodeToExchangeRates.put(currencyCode, List.of(exchangeRate));
+                    currencyCodeToExchangeRates.put(currencyCode, transformedExchangeRates);
                 }
             }
         }
+
         return currencyCodeToExchangeRates;
     }
 
