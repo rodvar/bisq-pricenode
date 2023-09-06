@@ -142,7 +142,7 @@ public class ExchangeRateServiceTest {
         when(mockedEnvironment.getProperty(eq("bisq.price.fiatcurrency.excluded"), anyString())).thenReturn(excludedCcvString);
         when(mockedEnvironment.getProperty(eq("bisq.price.fiatcurrency.excludedByProvider"), anyString())).thenReturn(providerExcludedCcvString);
         ExchangeRateProvider dummyProvider = buildDummyExchangeRateProvider(rateCurrencyCodes, mockedEnvironment);
-        ExchangeRateService service = new ExchangeRateService(mockedEnvironment, List.of(dummyProvider));
+        ExchangeRateService service = new ExchangeRateService(mockedEnvironment, List.of(dummyProvider), List.of());
 
         Map<String, Object> retrievedData = service.getAllMarketPrices();
 

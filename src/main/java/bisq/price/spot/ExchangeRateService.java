@@ -19,6 +19,8 @@ package bisq.price.spot;
 
 import bisq.common.util.Tuple2;
 import bisq.core.util.InlierUtil;
+import bisq.price.util.bluelytics.BlueLyticsService;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;

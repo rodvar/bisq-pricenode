@@ -100,7 +100,7 @@ public final class BlueLyticsService {
                             .build(),
                     new ParameterizedTypeReference<BlueLyticsDto>() {
                     }
-            ).getBody()).gapSellMultiplier();
+            ).getBody()).gapSellMultiplier().orElse(Double.NaN);
             lastRefresh = new Date().getTime();
             logger.info(String.format("New blue gap is %s and refresh was at epoch %s", lastBlueGap, lastRefresh));
         } catch (Exception e) {
