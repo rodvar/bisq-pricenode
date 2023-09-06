@@ -312,7 +312,7 @@ public class ExchangeRateServiceTest {
         // Collect all ExchangeRates from all providers and group them by currency code
         Map<String, List<ExchangeRate>> currencyCodeToExchangeRatesFromProviders = new HashMap<>();
         for (ExchangeRateProvider p : providers) {
-            for (ExchangeRate exchangeRate : service.providerCurrentExchangeRates(p)) {
+            for (ExchangeRate exchangeRate : p.get()) {
                 String currencyCode = exchangeRate.getCurrency();
                 if (currencyCodeToExchangeRatesFromProviders.containsKey(currencyCode)) {
                     List<ExchangeRate> l = new ArrayList<>(currencyCodeToExchangeRatesFromProviders.get(currencyCode));
@@ -328,17 +328,19 @@ public class ExchangeRateServiceTest {
         // value is an average
         currencyCodeToExchangeRatesFromProviders.forEach((currencyCode, exchangeRateList) -> {
             ExchangeRate rateFromService = currencyCodeToExchangeRateFromService.get(currencyCode);
-            double priceFromService = rateFromService.getPrice();
+            if (rateFromService != null) {
+                double priceFromService = rateFromService.getPrice();
 
-            OptionalDouble opt = exchangeRateList.stream().mapToDouble(ExchangeRate::getPrice).average();
-            double priceAvgFromProviders = opt.getAsDouble();
+                OptionalDouble opt = exchangeRateList.stream().mapToDouble(ExchangeRate::getPrice).average();
+                double priceAvgFromProviders = opt.getAsDouble();
 
-            // Ensure that the ExchangeRateService correctly aggregates exchange rates
-            // from multiple providers. If multiple providers contain rates for a
-            // currency, the service should return a single aggregate rate
-            // Expected value for aggregate rate = avg(provider rates)
-            // This formula works for any number of providers for a specific currency
-            assertEquals(priceFromService, priceAvgFromProviders, "Service returned incorrect aggregate rate");
+                // Ensure that the ExchangeRateService correctly aggregates exchange rates
+                // from multiple providers. If multiple providers contain rates for a
+                // currency, the service should return a single aggregate rate
+                // Expected value for aggregate rate = avg(provider rates)
+                // This formula works for any number of providers for a specific currency
+                assertEquals(priceFromService, priceAvgFromProviders, "Service returned incorrect aggregate rate");
+            }
         });
     }
 

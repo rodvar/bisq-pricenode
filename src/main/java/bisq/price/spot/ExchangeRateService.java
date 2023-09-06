@@ -215,7 +215,7 @@ class ExchangeRateService {
     private Map<String, List<ExchangeRate>> getCurrencyCodeToExchangeRates() {
         Map<String, List<ExchangeRate>> currencyCodeToExchangeRates = new HashMap<>();
         for (ExchangeRateProvider p : providers) {
-            Set<ExchangeRate> exchangeRates = providerCurrentExchangeRates(p);
+            Set<ExchangeRate> exchangeRates = p.get();
             if (exchangeRates == null)
                 continue;
 
